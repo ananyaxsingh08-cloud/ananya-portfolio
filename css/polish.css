@@ -1,0 +1,780 @@
+/* ============================================================
+   ANANYA SINGH — POLISH.CSS
+   Global fixes: smooth scroll, typography contrast, spacing,
+   mobile layout, image backgrounds, colour uplift
+   Loaded last — overrides everything before it.
+   ============================================================ */
+
+/* ── 1. SCROLL SMOOTHNESS ──────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Native smooth scroll — complement JS smooth scroll */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+body {
+  overflow-x: hidden;
+  /* Prevent overscroll rubber-band colour flash on iOS */
+  overscroll-behavior: none;
+  background-attachment: fixed;
+}
+
+/* GPU-accelerate scrollable containers */
+.keyshot-showcase,
+.bidet-types-row,
+.cwc-circuits {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.keyshot-showcase > *,
+.bidet-types-row > *,
+.cwc-item {
+  scroll-snap-align: start;
+}
+
+/* ── 2. COLOUR SYSTEM — white text hierarchy ───────────────── */
+:root {
+  /* Richer white-cream scale for legibility */
+  --white:        #FFFFFF;
+  --white-90:     rgba(255,255,255,0.90);
+  --white-75:     rgba(255,255,255,0.75);
+  --white-55:     rgba(255,255,255,0.55);
+  --white-35:     rgba(255,255,255,0.35);
+  --white-15:     rgba(255,255,255,0.15);
+
+  /* Keep paper/dune for warm accents, but pull primary text toward white */
+  --text-primary:   #F5F0E8;   /* near-white warm */
+  --text-secondary: rgba(245,240,232,0.78);
+  --text-muted:     rgba(245,240,232,0.52);
+  --text-faint:     rgba(245,240,232,0.30);
+
+  /* Accent hierarchy */
+  --gold:        #C9A876;   /* primary dune/gold accent */
+  --gold-light:  #DFC09A;   /* hover state */
+  --gold-dim:    rgba(201,168,118,0.55);
+
+  /* Background micro-levels */
+  --bg-0:  #080808;   /* absolute black */
+  --bg-1:  #0C0C0C;   /* page bg */
+  --bg-2:  #111111;   /* elevated card */
+  --bg-3:  #181818;   /* slightly lighter card */
+  --bg-4:  #202020;   /* hover surface */
+
+  /* Borders */
+  --border-faint:  rgba(255,255,255,0.06);
+  --border-soft:   rgba(255,255,255,0.11);
+  --border-mid:    rgba(255,255,255,0.20);
+  --border-strong: rgba(255,255,255,0.35);
+  --border-gold:   rgba(201,168,118,0.40);
+
+  /* Typography override */
+  --paper: #F0EAD8;   /* slightly whiter dune for better contrast */
+}
+
+/* ── 3. BODY & PAGE BACKGROUND ────────────────────────────── */
+body {
+  background: var(--bg-1);
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* ── 4. HERO — rich atmosphere ─────────────────────────────── */
+.hero {
+  background: var(--bg-0);
+  position: relative;
+}
+.hero::before {
+  background:
+    radial-gradient(ellipse 90% 65% at 70% 25%, rgba(201,168,118,0.22), transparent 58%),
+    radial-gradient(ellipse 60% 45% at 15% 80%, rgba(201,168,118,0.09), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 45% 55%, rgba(255,255,255,0.02), transparent 50%);
+}
+
+/* Hero text — max contrast */
+.hero-title { color: var(--white-90); }
+.hero-title .line-inner { will-change: transform; }
+.hero-title em { color: var(--gold); }
+.hero-supertitle { color: var(--gold); }
+.hero-meta { color: var(--white-55); }
+.hero-subtitle { color: var(--white-75); max-width: 480px; }
+.hero-year { color: var(--white-35); }
+.scroll-cue { color: var(--white-55); }
+.hero-frame { border-color: rgba(255,255,255,0.18); }
+
+/* ── 5. NAVIGATION ─────────────────────────────────────────── */
+.nav { background: transparent; }
+.nav.scrolled {
+  background: rgba(8,8,8,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border-faint);
+}
+.nav-mark { color: var(--white-90); }
+.nav-mark .dot { background: var(--gold); }
+.nav-links a { color: var(--white-55); }
+.nav-links a:hover { color: var(--white-90); opacity: 1; }
+.nav-links a.nav-active { color: var(--gold); }
+.nav-links a::after { background: var(--gold); }
+
+/* Mobile nav overlay */
+.nav-links.open {
+  background: var(--bg-0);
+}
+.nav-links.open a { color: var(--white-75); font-size: 1rem; }
+
+/* ── 6. ABOUT SECTION ──────────────────────────────────────── */
+.about { background: var(--bg-1); }
+.section-eyebrow { color: var(--white-55); }
+.about-intro { color: var(--white-90); }
+.about-intro em { color: var(--gold); }
+.about-block h4 { color: var(--white-55); border-bottom-color: var(--border-faint); }
+.edu-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border-faint);
+  border-radius: 6px;
+  padding: 1.25rem;
+}
+.edu-card .year { color: var(--gold); }
+.edu-card .deg { color: var(--white-90); }
+.edu-card .inst { color: var(--white-55); }
+.skills-list li { color: var(--white-75); border-bottom-color: var(--border-faint); }
+.skills-list li::before { color: var(--gold); }
+.journey-step .step-label { color: var(--white-55); }
+.journey-step ul li { color: var(--white-75); }
+.journey::before { background: var(--border-faint); }
+
+/* Portrait */
+.about-portrait { border-color: var(--border-soft); }
+.portrait-caption .pc-name { color: var(--white-90); }
+.portrait-caption .pc-role { color: var(--gold); }
+
+/* ── 7. INDEX SECTION ──────────────────────────────────────── */
+.index { background: var(--bg-0); }
+.index-head h2 { color: var(--white-90); }
+.index-head h2 em { color: var(--gold); font-style: italic; }
+.index-head .count { color: var(--white-35); }
+.index-head { border-bottom-color: var(--border-faint); }
+.index-item { border-bottom-color: var(--border-faint); }
+.index-item .num { color: var(--gold-dim); }
+.index-item .title-block h3 { color: var(--white-90); }
+.index-item .title-block .sub { color: var(--white-35); }
+.index-item .meta-col { color: var(--white-35); }
+.index-item .meta-col .label { color: var(--white-35); }
+.index-item:hover .num { color: var(--gold); }
+.index-item .thumb { background: var(--bg-3); border-radius: 3px; }
+
+/* ── 8. CHAPTERS (all backgrounds) ─────────────────────────── */
+.chapter { background: var(--bg-1); color: var(--text-primary); }
+.chapter.dark { background: var(--bg-0); }
+.chapter.elevated { background: var(--bg-2); }
+
+.chapter-head .chapter-label { color: var(--white-35); }
+.chapter-head .chapter-label::before { background: var(--gold-dim); }
+.chapter-head h3 { color: var(--white-90); }
+.chapter-head h3 em { color: var(--gold); }
+
+/* Editorial body text */
+.editorial-body { color: var(--white-75); }
+.editorial-body strong { color: var(--white-90); }
+.editorial-body em { color: var(--gold); font-style: italic; }
+.editorial-body p + p { margin-top: 1rem; }
+
+/* Figure captions */
+.figure-caption {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--white-35);
+}
+.figure-caption .fig-num { color: var(--gold-dim); }
+.figure-caption span + span::before {
+  content: '—';
+  margin-right: 0.75rem;
+  color: var(--white-15);
+}
+
+/* Principle grid */
+.principle { border-top-color: var(--border-soft); }
+.principle .p-num { color: var(--gold); }
+.principle h4 { color: var(--white-90); }
+.principle p { color: var(--white-55); }
+
+/* Stats */
+.stat .n { color: var(--white-90); }
+.stat .l { color: var(--white-35); }
+.stat { border-top-color: var(--border-faint); }
+.stat:hover .n { color: var(--gold); }
+
+/* Tags */
+.tag { border-color: var(--border-soft); color: var(--white-55); }
+
+/* Pull statements */
+.pull-statement { color: var(--white-90); }
+.pull-statement em { color: var(--gold); }
+.pull-statement .strike { color: var(--white-35); }
+
+/* Code block */
+.code-block {
+  background: var(--bg-0);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  color: var(--white-75);
+}
+.c-keyword { color: #79C0FF; }
+.c-comment { color: var(--white-35); }
+.c-string  { color: #A8D978; }
+
+/* ── 9. PROJECT OPENERS ─────────────────────────────────────── */
+.project-opener { background: var(--bg-0); }
+.opener-text { background: var(--bg-0); }
+.opener-num { color: var(--gold); opacity: 0.6; }
+.opener-title { color: var(--white-90); }
+.opener-title em { color: var(--gold); }
+.opener-eyebrow span, .opener-eyebrow { color: var(--white-35); }
+.opener-desc { color: var(--white-55); }
+
+/* Opener image treatment */
+.opener-image {
+  background: var(--bg-0);
+}
+.opener-image img {
+  filter: brightness(0.85) contrast(1.05) saturate(0.92);
+  transition: filter 0.6s ease, transform 0.1s linear;
+}
+.opener-image::after {
+  background:
+    linear-gradient(to left, transparent 40%, rgba(8,8,8,0.96) 100%),
+    radial-gradient(ellipse 80% 70% at 60% 50%, transparent 20%, rgba(8,8,8,0.5) 70%, rgba(8,8,8,0.88) 100%);
+}
+.project-opener.flip .opener-image::after {
+  background:
+    linear-gradient(to right, transparent 40%, rgba(8,8,8,0.96) 100%),
+    radial-gradient(ellipse 80% 70% at 40% 50%, transparent 20%, rgba(8,8,8,0.5) 70%, rgba(8,8,8,0.88) 100%);
+}
+
+/* ── 10. IMAGE BACKGROUNDS & CANVAS ────────────────────────── */
+.canvas {
+  background: var(--bg-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.canvas img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.canvas-info { background: transparent; border-radius: 4px; }
+.canvas-info img { object-fit: contain; }
+
+/* Remove jarring white backgrounds from images */
+img[src*="bidet"],
+img[src*="marshall-cmf"],
+img[src*="marshall-moodboard"],
+img[src*="table-context"],
+img[src*="table-process"],
+img[src*="table-location"],
+img[src*="table-research"],
+img[src*="table-primary"] {
+  background: var(--bg-2);
+  /* Invert white-bg images: not needed — using CSS mix */
+}
+
+/* For light-bg images on dark background — subtle wrapper */
+.canvas-info {
+  background: var(--bg-2);
+  padding: 1.5rem;
+  border-radius: 6px;
+}
+
+/* ── 11. MARSHALL CMF ──────────────────────────────────────── */
+.cmf-swatch { border: 1px solid var(--border-faint); border-radius: 3px; }
+.cmf-swatch-label { color: var(--white-55); }
+.cmf-section-label { color: var(--white-35); }
+
+/* ── 12. DRIFT ─────────────────────────────────────────────── */
+.project[data-project="drift"] .chapter { background: var(--bg-0); }
+.project[data-project="drift"] .chapter.elevated { background: var(--bg-2); }
+.project[data-project="drift"] .attr-chip {
+  border-color: var(--border-mid);
+  color: var(--white-75);
+}
+
+/* ── 13. BIDET SECTION ─────────────────────────────────────── */
+.project[data-project="bidet"] .chapter { background: var(--bg-0); }
+.project[data-project="bidet"] .chapter.elevated { background: var(--bg-2); }
+.insight-cloud { background: var(--bg-2); border-color: var(--border-soft); }
+.insight-center { color: var(--gold); }
+.insight-node { color: var(--white-75); background: var(--bg-3); border-color: var(--border-soft); }
+.node-quote { color: var(--white-55); border-top-color: var(--border-soft); }
+.bt-item { background: var(--bg-2); border-color: var(--border-soft); }
+.bt-num { color: var(--gold); }
+.bt-item h5 { color: var(--white-90); }
+.bidet-types-row .bt-item:hover { background: var(--bg-3); border-color: var(--border-gold); }
+
+/* Audience cards */
+.audience-split .audience-card {
+  background: var(--bg-2);
+  border-color: var(--border-soft);
+}
+.audience-split .audience-card p { color: var(--white-90); }
+.audience-split .audience-card .ic { color: var(--gold); }
+
+/* ── 14. WORKING TABLE ─────────────────────────────────────── */
+.project[data-project="table"] .chapter { background: var(--bg-1); }
+.project[data-project="table"] .chapter.dark { background: var(--bg-0); }
+
+/* ── 15. MARSHALL ──────────────────────────────────────────── */
+.project[data-project="marshall"] .chapter { background: var(--bg-1); }
+.project[data-project="marshall"] .chapter.dark { background: var(--bg-0); }
+
+/* Persona card */
+.persona-card, .persona-spread > * {
+  background: var(--bg-2);
+  border: 1px solid var(--border-faint);
+  border-radius: 4px;
+  padding: 1.25rem;
+}
+
+/* ── 16. CLOSING / FOOTER ──────────────────────────────────── */
+.project-close, .closing-note {
+  background: var(--bg-0);
+  border-top-color: var(--border-faint);
+}
+.closing-note { border-color: var(--border-soft); }
+.closing-note .cn-label { color: var(--gold); }
+
+footer {
+  background: var(--bg-0);
+  border-top: 1px solid var(--border-faint);
+}
+.footer-foot { color: var(--white-35); border-top-color: var(--border-faint); }
+
+/* Contact */
+.contact-grid a { color: var(--white-90); }
+.contact-grid a:hover { color: var(--gold); }
+.contact-grid p { color: var(--white-55); }
+
+/* ── 17. THEME PANTHER ─────────────────────────────────────── */
+.theme-panther .tp-cue { border-top-color: var(--border-soft); }
+.theme-panther .cue-label { color: var(--white-35); }
+.theme-panther .tp-cue p { color: var(--white-75); }
+.attr-chip { border-color: var(--border-mid); color: var(--white-75); }
+
+/* ── 18. CODE + CIRCUITS ───────────────────────────────────── */
+.code-with-circuits .cwc-circuits .canvas {
+  background: var(--bg-2);
+  border-radius: 4px;
+}
+.cwc-item .figure-caption { color: var(--white-35); }
+
+/* ── 19. SMOOTH SCROLLING SYSTEM ───────────────────────────── */
+/* Momentum physics for section transitions */
+.project,
+.chapter,
+.project-opener {
+  will-change: auto;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Blur backdrop for nav = no layout jank */
+.nav {
+  will-change: background;
+  transform: translateZ(0);
+}
+
+/* ── 20. MOBILE — FIX EXCESSIVE SPACING ────────────────────── */
+
+@media (max-width: 900px) {
+  /* Spacing scale */
+  :root {
+    --space-6: 3rem;
+    --space-7: 4rem;
+    --space-8: 5.5rem;
+    --gutter: 1.25rem;
+  }
+
+  /* Prevent horizontal overflow */
+  body { overflow-x: hidden; }
+  .container, .container-wide { overflow-x: clip; }
+
+  /* Chapter padding */
+  .chapter { padding: 4rem 0; }
+  .chapter.tight { padding: 2.5rem 0; }
+
+  /* Chapter heads → single column */
+  .chapter-head {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  .chapter-head h3 { font-size: clamp(1.8rem, 5.5vw, 3rem); }
+
+  /* Remove empty space from editorial-body on narrow screens */
+  .editorial-body { font-size: 0.92rem; }
+
+  /* Two and three col → single */
+  .two-col,
+  .three-col,
+  .principle-grid,
+  .insight-matrix,
+  .cmf-row,
+  .brand-pillars,
+  .tech-list,
+  .persona-spread,
+  .persona-details,
+  .concept-compare,
+  .user-quotes,
+  .stat-row,
+  .hero-render-block,
+  .inspiration-board,
+  .stack-2,
+  .stack-3,
+  .stack-4,
+  .editorial-grid,
+  .theme-panther,
+  .audience-split,
+  .code-with-circuits {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem;
+  }
+
+  /* Keep stat-row 2-col on tablet+ but 1 on very small */
+  .stat-row { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+
+  /* Bidet types → 1 col */
+  .bidet-types-row { grid-template-columns: 1fr; gap: 0.75rem; }
+
+  /* Circuits → horizontal scroll strip */
+  .cwc-circuits {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto;
+    gap: 0.75rem;
+    padding: 0.5rem 0 1rem;
+    /* fix: no top padding offset */
+    padding-top: 0 !important;
+    scrollbar-width: none;
+  }
+  .cwc-circuits::-webkit-scrollbar { display: none; }
+  .cwc-item { min-width: 200px; flex: 0 0 200px; }
+  .cwc-item .canvas { height: 150px; }
+
+  /* Audience split */
+  .audience-split .audience-col-img { order: 2; }
+  .audience-split .audience-col-list { order: 1; }
+
+  /* Openers */
+  .project-opener,
+  .project-opener.flip {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .project-opener.flip .opener-text { order: 1; }
+  .project-opener.flip .opener-image { order: 2; }
+  .opener-image { min-height: 55vw; max-height: 65vw; }
+  .opener-text { padding: 4rem var(--gutter) 3rem; }
+  .opener-num { font-size: clamp(5rem, 12vw, 8rem); }
+  .opener-title { font-size: clamp(1.4rem, 4.5vw, 2.2rem); }
+
+  /* About */
+  .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .about-portrait { width: 150px; height: 150px; }
+  .about-intro { font-size: 1.1rem; }
+  .edu-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .skills-list { grid-template-columns: repeat(2, 1fr); }
+  .journey { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+
+  /* Index */
+  .index-item { grid-template-columns: 50px 1fr auto; gap: 1rem; }
+  .index-item .meta-col { display: none; }
+  .index-item .thumb { width: 85px; }
+  .index-item .title-block h3 { font-size: 1.2rem; }
+  .index-item .num { font-size: 2rem; }
+
+  /* Nav */
+  .nav-links { display: none; }
+  .nav-links.open {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    background: rgba(8,8,8,0.98);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2.5rem;
+    z-index: 99;
+    backdrop-filter: blur(12px);
+  }
+  .nav-links.open a { font-size: 1.1rem; color: var(--white-90); letter-spacing: 0.1em; }
+  .nav-toggle { display: flex; }
+
+  .hero-year { display: none; }
+  .hero { padding: 5.5rem var(--gutter) 3rem; }
+  .hero-title { font-size: clamp(3rem, 9vw, 6rem); }
+  .hero-bottom { flex-direction: column; gap: 1.5rem; align-items: flex-start; }
+  .hero-subtitle { max-width: 100%; }
+
+  /* Scenario grid → 2 col */
+  .scenario-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 220px; }
+  .sc-large { grid-column: span 2; grid-row: span 1; }
+  .sc-wide { grid-column: span 2; }
+  .sc-tall, .sc-1x1 { grid-column: span 1; grid-row: span 1; }
+
+  /* Keyshots → 2 col */
+  .keyshot-showcase { grid-template-columns: repeat(2, 1fr); gap: 2px; }
+
+  /* Table timeline */
+  .process-timeline { grid-template-columns: 1fr; gap: 1.5rem; }
+  .process-timeline::before { display: none; }
+
+  /* Drift theme */
+  .tp-cues { grid-template-columns: 1fr !important; gap: 1rem; }
+
+  /* Lightbox adjustments */
+  .lb-content { max-width: 95vw; }
+  .lb-img { max-height: 75vh; }
+}
+
+/* ── 21. SMALL PHONE (<480px) ──────────────────────────────── */
+@media (max-width: 479px) {
+  :root {
+    --space-6: 2.5rem;
+    --space-7: 3rem;
+    --space-8: 4rem;
+    --gutter: 1rem;
+  }
+
+  body { font-size: 14px; }
+
+  .hero { padding: 5rem 1rem 2.5rem; }
+  .hero-title { font-size: clamp(2.4rem, 10.5vw, 4rem); }
+  .hero-frame { display: none; }
+  .hero-meta { font-size: 0.58rem; }
+
+  /* Chapter */
+  .chapter { padding: 3rem 0; }
+  .chapter-head h3 { font-size: clamp(1.5rem, 6.5vw, 2.2rem); }
+
+  /* Index */
+  .index-head h2 { font-size: clamp(1.8rem, 10vw, 3rem); }
+  .index-item { grid-template-columns: 42px 1fr auto; gap: 0.6rem; padding: 1.25rem 0; }
+  .index-item .num { font-size: 1.5rem; }
+  .index-item .thumb { width: 65px; }
+  .index-item .title-block h3 { font-size: 0.95rem; }
+  .index-item .title-block .sub { display: none; }
+
+  /* Openers */
+  .opener-num { font-size: 4.5rem; }
+  .opener-title { font-size: clamp(1.1rem, 5vw, 1.6rem); }
+  .opener-text { padding: 3rem 1rem 2rem; }
+
+  /* About */
+  .about-portrait { width: 130px; height: 130px; }
+  .about-intro { font-size: 1rem; }
+  .skills-list { grid-template-columns: 1fr; }
+  .journey { grid-template-columns: 1fr; }
+
+  /* Stats */
+  .stat-row { grid-template-columns: 1fr 1fr; }
+  .stat .n { font-size: clamp(1.6rem, 8vw, 2.5rem); }
+
+  /* Scenarios single col */
+  .scenario-grid { grid-template-columns: 1fr; grid-auto-rows: 200px; }
+  .sc-large, .sc-wide, .sc-tall, .sc-1x1 { grid-column: 1; grid-row: span 1; }
+
+  /* Keyshots → 2-up */
+  .keyshot-showcase { grid-template-columns: repeat(2, 1fr); gap: 2px; }
+
+  /* Circuits tighter */
+  .cwc-item { min-width: 160px; flex: 0 0 160px; }
+  .cwc-item .canvas { height: 120px; }
+
+  /* Code block */
+  .code-block { font-size: 0.62rem; padding: 1rem; overflow-x: auto; }
+  pre.code-block { white-space: pre; }
+
+  /* Figure caption wrap */
+  .figure-caption { font-size: 0.6rem; gap: 0.4rem; }
+
+  /* Bidet types */
+  .bidet-types-row .bt-item { padding: 0.85rem 1rem; }
+
+  /* Lightbox */
+  .lb-close { top: 0.75rem; right: 0.75rem; font-size: 1.1rem; }
+  .lb-caption { font-size: 0.58rem; }
+}
+
+/* ── 22. LANDSCAPE PHONE ───────────────────────────────────── */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .hero { min-height: auto; padding: 4rem var(--gutter) 2rem; }
+  .hero-title { font-size: clamp(2.5rem, 6vw, 4rem); }
+  .opener-image { min-height: 100vw; }
+  .project-opener { grid-template-columns: 1fr 1fr; }
+  .project-opener .opener-image { min-height: 100vh; }
+  .project-opener .opener-text { padding: 2rem var(--gutter); }
+}
+
+/* ── 23. TABLET (768px–1023px) ─────────────────────────────── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root { --gutter: 1.75rem; }
+
+  .chapter { padding: 5rem 0; }
+  .chapter-head { grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+
+  .two-col { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .three-col { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .stack-3 { grid-template-columns: repeat(2, 1fr); }
+  .stack-4 { grid-template-columns: repeat(2, 1fr); }
+
+  .bidet-types-row { grid-template-columns: repeat(2, 1fr); }
+  .bidet-types-row > :last-child:nth-child(3n+1) { grid-column: span 2; }
+
+  .code-with-circuits { grid-template-columns: 1fr 200px; }
+  .cwc-circuits { padding-top: calc(0.7rem + 1rem + 1rem) !important; }
+
+  .audience-split { grid-template-columns: 1.3fr 1fr; gap: 2rem; }
+
+  .project-opener { grid-template-columns: 5fr 6fr; }
+  .opener-text { padding: 5rem 2rem 3rem; }
+
+  .about-grid { grid-template-columns: 200px 1fr; gap: 2.5rem; }
+  .edu-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .skills-list { grid-template-columns: repeat(2, 1fr); }
+  .journey { grid-template-columns: repeat(2, 1fr); }
+
+  .index-item { grid-template-columns: 60px 1.2fr 1fr auto; gap: 1.5rem; }
+  .index-item .thumb { width: 100px; }
+
+  .scenario-grid { grid-template-columns: repeat(3, 1fr); }
+  .sc-large { grid-column: span 3; grid-row: span 1; }
+  .sc-wide { grid-column: span 2; }
+  .sc-tall, .sc-1x1 { grid-column: span 1; }
+
+  .stat-row { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+
+  .tp-cues { grid-template-columns: repeat(2, 1fr) !important; gap: 1.25rem; }
+
+  .keyshot-showcase { grid-template-columns: repeat(3, 1fr); gap: 3px; }
+}
+
+/* ── 24. DESKTOP (1024px+) ─────────────────────────────────── */
+@media (min-width: 1024px) {
+  :root { --gutter: clamp(2rem, 4vw, 3.5rem); }
+  .chapter { padding: 6rem 0; }
+  .stat-row { grid-template-columns: repeat(4, 1fr); }
+  .code-with-circuits { grid-template-columns: 1fr 220px; }
+  .cwc-circuits { padding-top: calc(0.7rem + 1rem + 1rem); }
+}
+
+/* ── 25. LARGE DESKTOP (1440px+) ───────────────────────────── */
+@media (min-width: 1440px) {
+  :root { --gutter: clamp(2.5rem, 5vw, 4.5rem); }
+  .hero-title { font-size: clamp(7rem, 9vw, 11rem); }
+  .chapter { padding: 7rem 0; }
+}
+
+/* ── 26. CANVAS-INFO light images on dark bg ────────────────── */
+/* Give light-bg screenshots a slight dark border + inset shadow */
+.canvas-info {
+  box-shadow: inset 0 0 0 1px var(--border-faint);
+}
+
+/* Table context / process diagrams — these are light bg images */
+.canvas-info img {
+  border-radius: 4px;
+  /* dim slightly to reduce harshness of white on black */
+  filter: brightness(0.95) contrast(1.02);
+}
+
+/* Moodboards — keep rich */
+img[src*="moodboard"] {
+  filter: brightness(1) contrast(1.05) saturate(1.1);
+}
+
+/* ── 27. MISC ELEMENT FIXES ─────────────────────────────────── */
+/* Ensure all section headers match new white scale */
+.section-title { color: var(--white-90); }
+.section-title em { color: var(--gold); }
+
+/* Process timeline labels */
+.pt-label { color: var(--white-35); }
+.pt-title { color: var(--white-90); }
+.pt-body { color: var(--white-55); }
+.pt-dot { background: var(--gold); }
+.pt-dot::before { border-color: rgba(201,168,118,0.3); }
+
+/* Persona details */
+.pd-label { color: var(--white-35); }
+.pd-value { color: var(--white-90); }
+.pd-section-title { color: var(--white-35); }
+
+/* Feature cards in research */
+.research-callout { border-color: var(--border-soft); background: var(--bg-2); }
+.research-callout h5 { color: var(--white-90); }
+.research-callout p { color: var(--white-55); }
+
+/* Closing notes */
+.cn-body { color: var(--white-75); }
+
+/* Journey step dots */
+.journey-step::before { background: var(--gold); }
+.journey::before { background: var(--border-faint); }
+
+/* Accent line before section eyebrow */
+.section-eyebrow::before { background: var(--gold-dim); }
+
+/* Pull quote highlight */
+.pull-statement .accent { color: var(--gold); }
+
+/* ── 28. SCROLL PROGRESS colour ─────────────────────────────── */
+.scroll-progress {
+  background: linear-gradient(to right, var(--gold) 0%, var(--gold-light) 100%);
+}
+
+/* ── 29. LIGHTBOX colours ───────────────────────────────────── */
+.lb-backdrop { background: rgba(4,4,4,0.96); }
+.lb-close { color: var(--white-55); }
+.lb-close:hover { color: var(--white-90); }
+.lb-caption { color: var(--white-35); }
+
+/* ── 30. ACCESSIBILITY ──────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ── iOS 100vh FIX ────────────────────────────────────────── */
+/* Uses --vh custom property set by JS for real viewport height */
+.hero {
+  min-height: calc(var(--vh, 1vh) * 100);
+}
+.project-opener {
+  min-height: calc(var(--vh, 1vh) * 100);
+}
+@media (max-width: 900px) {
+  .project-opener,
+  .project-opener.flip {
+    min-height: auto;
+  }
+  .opener-image {
+    height: calc(var(--vh, 1vh) * 55);
+  }
+}

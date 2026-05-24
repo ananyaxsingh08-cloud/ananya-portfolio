@@ -1,0 +1,442 @@
+/* ============================================================
+   CURSOR + DOT FIELD + HOVER EFFECTS
+   ============================================================ */
+
+/* ── HIDE NATIVE CURSOR on desktop ─────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  *, *::before, *::after { cursor: none !important; }
+}
+
+/* ── SCROLL PROGRESS BAR ───────────────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #C9A876 0%, #DFC09A 60%, rgba(201,168,118,0.4) 100%);
+  transform-origin: left center;
+  transform: scaleX(0);
+  z-index: 9998;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ── DOT FIELD CANVAS ──────────────────────────────────────── */
+.dot-field {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  /* sits behind all content */
+  opacity: 1;
+}
+/* Push page content above canvas */
+.nav, header, section, .project, footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── CURSOR RING ───────────────────────────────────────────── */
+.cr-ring {
+  position: fixed;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid rgba(201,168,118,0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9997;
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center;
+  transition:
+    transform  0.35s cubic-bezier(0.16,1,0.3,1),
+    opacity    0.35s ease,
+    border-color 0.3s ease,
+    width      0.35s cubic-bezier(0.16,1,0.3,1),
+    height     0.35s cubic-bezier(0.16,1,0.3,1);
+  will-change: left, top, transform;
+  /* Zoom label */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+/* "View" label inside ring when over image */
+.cr-ring::before {
+  content: attr(data-label);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(201,168,118,0.9);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  position: absolute;
+}
+.cr-ring--zoom::before { opacity: 1; }
+.cr-ring--zoom {
+  border-color: rgba(201,168,118,0.9);
+  background: rgba(201,168,118,0.06);
+  backdrop-filter: blur(4px);
+}
+
+/* ── CURSOR DOT ────────────────────────────────────────────── */
+.cr-dot {
+  position: fixed;
+  width: 5px;
+  height: 5px;
+  background: #C9A876;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center;
+  transition:
+    transform 0.15s cubic-bezier(0.16,1,0.3,1),
+    background 0.2s ease;
+  will-change: left, top, transform;
+}
+
+/* ── TRAIL DOTS ────────────────────────────────────────────── */
+.cr-trail {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(201,168,118,0.55);
+  pointer-events: none;
+  z-index: 9996;
+  transform: translate(-50%, -50%) scale(1);
+  will-change: left, top, transform, opacity;
+}
+
+/* ── CLICK RIPPLE ──────────────────────────────────────────── */
+.cr-ripple {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  border: 1px solid rgba(201,168,118,0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9995;
+  opacity: 0;
+  transform: translate(-50%,-50%) scale(0);
+  will-change: transform, opacity;
+}
+
+/* ── CANVAS IMAGE HOVER ─────────────────────────────────────── */
+.canvas {
+  overflow: hidden;
+  position: relative;
+  border-radius: 4px;
+  isolation: isolate;
+}
+.canvas img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    transform  0.8s cubic-bezier(0.16,1,0.3,1),
+    filter     0.5s ease;
+  will-change: transform;
+}
+.canvas:hover img { transform: scale(1.04); }
+
+/* Shine sweep on hover */
+.canvas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255,255,255,0.07) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0s;
+  z-index: 2;
+  pointer-events: none;
+}
+.canvas:hover::before {
+  transform: translateX(200%);
+  transition: transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* Dark tint overlay */
+.canvas::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(8,8,8,0);
+  transition: background 0.4s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.canvas:hover::after { background: rgba(8,8,8,0.06); }
+
+/* ── INDEX ITEM HOVER ──────────────────────────────────────── */
+.index-item {
+  position: relative;
+  transition: padding-left 0.5s cubic-bezier(0.16,1,0.3,1),
+              padding-right 0.5s cubic-bezier(0.16,1,0.3,1),
+              background 0.3s ease;
+}
+.index-item:hover {
+  padding-left: 1rem;
+  background: rgba(201,168,118,0.025);
+}
+/* Animated left border on hover */
+.index-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, transparent, var(--gold, #C9A876), transparent);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.index-item:hover::before { transform: scaleY(1); }
+
+.index-item .thumb img {
+  transition: transform 1.2s cubic-bezier(0.16,1,0.3,1), filter 0.4s ease;
+}
+.index-item:hover .thumb img { transform: scale(1.07); filter: brightness(1.08) saturate(1.1); }
+
+/* ── PRINCIPLE / FEATURE CARDS ─────────────────────────────── */
+.principle {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  transition: transform 0.45s cubic-bezier(0.16,1,0.3,1),
+              border-color 0.3s ease;
+}
+.principle:hover { transform: translateY(-5px); border-top-color: rgba(201,168,118,0.4); }
+
+/* ── ABOUT PORTRAIT ────────────────────────────────────────── */
+.about-portrait {
+  transition: transform 0.6s cubic-bezier(0.16,1,0.3,1),
+              box-shadow 0.6s ease;
+}
+.about-portrait:hover {
+  transform: scale(1.04) rotate(-0.8deg);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.6), 0 0 0 1.5px rgba(201,168,118,0.35);
+}
+
+/* ── EDUCATION CARDS ───────────────────────────────────────── */
+.edu-card {
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+              border-color 0.3s ease,
+              background 0.3s ease;
+}
+.edu-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201,168,118,0.35);
+  background: rgba(201,168,118,0.04);
+}
+
+/* ── SKILLS LIST ───────────────────────────────────────────── */
+.skills-list li {
+  transition: padding-left 0.3s cubic-bezier(0.16,1,0.3,1), color 0.25s ease;
+}
+.skills-list li:hover { padding-left: 0.5rem; color: var(--white-90, #F5F0E8); }
+.skills-list li::before { transition: color 0.25s ease; }
+.skills-list li:hover::before { color: #C9A876; }
+
+/* ── JOURNEY STEPS ─────────────────────────────────────────── */
+.journey-step {
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.journey-step:hover { transform: translateY(-5px); }
+.journey-step::before {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.journey-step:hover::before {
+  transform: translateY(50%) scale(1.5);
+  box-shadow: 0 0 0 5px rgba(201,168,118,0.18);
+}
+
+/* ── STATS ─────────────────────────────────────────────────── */
+.stat {
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.stat:hover { transform: translateY(-4px); }
+.stat:hover .n { color: #C9A876; }
+.stat .n { transition: color 0.3s ease; }
+
+/* ── BIDET TYPE CARDS ──────────────────────────────────────── */
+.bt-item {
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+              border-color 0.3s ease,
+              background 0.3s ease;
+}
+.bt-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201,168,118,0.4);
+  background: rgba(201,168,118,0.06);
+}
+
+/* ── AUDIENCE CARDS ────────────────────────────────────────── */
+.audience-split .audience-card {
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+              border-color 0.3s ease,
+              background 0.3s ease;
+}
+.audience-split .audience-card:hover {
+  transform: translateX(7px);
+  border-color: rgba(201,168,118,0.4);
+  background: rgba(201,168,118,0.05);
+}
+
+/* ── INSIGHT NODES ─────────────────────────────────────────── */
+.insight-node {
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1),
+              background 0.25s ease,
+              border-color 0.25s ease;
+}
+.insight-node:hover {
+  transform: scale(1.03);
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(201,168,118,0.3);
+}
+
+/* ── PANTHER CUES ──────────────────────────────────────────── */
+.tp-cue {
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;
+}
+.theme-panther .tp-cues .tp-cue { opacity: 0.7; }
+.tp-cue:hover { transform: translateX(4px); opacity: 1 !important; }
+
+/* ── ATTR CHIPS ────────────────────────────────────────────── */
+.attr-chip {
+  transition: border-color 0.3s ease, color 0.3s ease,
+              background 0.3s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.attr-chip:hover {
+  border-color: #C9A876 !important;
+  color: #C9A876 !important;
+  background: rgba(201,168,118,0.08) !important;
+  transform: translateY(-2px);
+}
+
+/* ── NAV LINKS ─────────────────────────────────────────────── */
+.nav-links a {
+  transition: opacity 0.3s ease, color 0.3s ease;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 0; height: 1px;
+  background: #C9A876;
+  transition: width 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.nav-links a:hover::after,
+.nav-links a.nav-active::after { width: 100%; }
+.nav-links a.nav-active { color: #C9A876; opacity: 1; }
+
+/* ── CHAPTER H3 EM ITALIC ──────────────────────────────────── */
+.chapter-head h3 em {
+  transition: color 0.3s ease;
+  display: inline;
+}
+.chapter-head:hover h3 em { color: #C9A876; }
+
+/* ── DRIFT SCENARIO PANELS ─────────────────────────────────── */
+.sc-panel {
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1),
+              box-shadow 0.5s ease;
+}
+.sc-panel:hover { transform: scale(1.018); z-index: 2; box-shadow: 0 24px 70px rgba(0,0,0,0.55); }
+
+/* ── OPENER IMAGE TILT ─────────────────────────────────────── */
+.opener-image { overflow: hidden; }
+.opener-image img {
+  transition: transform 0.1s linear, filter 0.6s ease;
+  will-change: transform;
+}
+
+/* ── CODE BLOCK ────────────────────────────────────────────── */
+.code-block {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.code-block:hover {
+  border-color: rgba(201,168,118,0.25);
+  box-shadow: 0 0 0 1px rgba(201,168,118,0.08);
+}
+
+/* ── LIGHTBOX ──────────────────────────────────────────────── */
+.lightbox {
+  position: fixed; inset: 0;
+  z-index: 9000;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.lightbox.open { opacity: 1; pointer-events: all; }
+.lb-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(4,4,4,0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.lb-close {
+  position: absolute; top: 1.5rem; right: 1.5rem;
+  font-size: 1.4rem; color: rgba(245,240,232,0.6);
+  z-index: 2; transition: color 0.2s ease, transform 0.3s ease;
+  font-family: var(--serif, serif);
+}
+.lb-close:hover { color: #F5F0E8; transform: rotate(90deg); }
+.lb-content {
+  position: relative; z-index: 2;
+  max-width: 90vw; max-height: 88vh;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+}
+.lb-img {
+  max-width: 90vw; max-height: 80vh;
+  object-fit: contain; border-radius: 4px;
+  box-shadow: 0 30px 100px rgba(0,0,0,0.9);
+  transform: scale(0.92);
+  transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+}
+.lightbox.open .lb-img { transform: scale(1); }
+.lb-caption {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.65rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(245,240,232,0.35);
+}
+
+/* ── CLOSING NOTE HOVER ─────────────────────────────────────── */
+.closing-note {
+  transition: border-color 0.4s ease, background 0.4s ease;
+}
+.closing-note:hover {
+  border-color: rgba(201,168,118,0.4);
+  background: rgba(201,168,118,0.03);
+}
+
+/* ── SCROLL CUE ────────────────────────────────────────────── */
+.scroll-cue {
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+.scroll-cue:hover { color: #F5F0E8; opacity: 1; }
+
+/* ── PREFERS REDUCED MOTION ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .cr-ring, .cr-dot, .cr-trail, .cr-ripple, .dot-field,
+  .scroll-progress { display: none !important; }
+  *, *::before, *::after {
+    cursor: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* ── TOUCH: restore cursor, hide custom elements ────────────── */
+@media (hover: none), (pointer: coarse) {
+  .cr-ring, .cr-dot, .cr-trail, .cr-ripple { display: none !important; }
+  *, *::before, *::after { cursor: auto !important; }
+  .dot-field { opacity: 0.4; } /* keep subtle on mobile */
+}
