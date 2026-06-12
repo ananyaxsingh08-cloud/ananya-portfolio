@@ -778,3 +778,307 @@ img[src*="moodboard"] {
     height: calc(var(--vh, 1vh) * 55);
   }
 }
+
+
+/* ============================================================
+   ANIMATION ENHANCEMENTS — v17
+   Pure progressive enhancement. No layout changes.
+   All original design preserved.
+   ============================================================ */
+
+/* ── Canvas image scale breathe (parallax feel) ── */
+.canvas img {
+  transition: transform 0.1s linear;
+  will-change: transform;
+  transform-origin: center center;
+}
+/* Override the hover scale from cursor.css to work with JS scale */
+.canvas:hover img {
+  /* JS handles the transform; hover tint via filter */
+  filter: brightness(1.03);
+}
+
+/* ── Chapter heading animation ── */
+.chapter-head .chapter-label {
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+}
+.chapter-head h3 {
+  transition: opacity 0.7s var(--ease-out) 0.1s, transform 0.7s var(--ease-out) 0.1s;
+}
+
+/* Chapter label line draw on section visibility */
+.chapter-head .chapter-label::before {
+  /* already exists in style.css; we add transition */
+  transition: width 0.7s var(--ease-out);
+}
+
+/* When chapter enters viewport: animate the label line */
+.chapter-visible .chapter-head .chapter-label::before {
+  width: 28px; /* match style.css value */
+}
+
+/* Pre-state for chapter headings coming in */
+.chapter:not(.chapter-visible) .chapter-head .chapter-label {
+  opacity: 0.4;
+}
+.chapter-visible .chapter-head .chapter-label {
+  opacity: 1;
+}
+
+/* ── Reveal refinements ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity  0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0s);
+}
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Image wipe stays the same — just shorten to match */
+.reveal-mask::after {
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Pull statement word-by-word ── */
+.pull-statement .ps-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity  0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pull-statement.ps-in .ps-word {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Insight cells: rise with slight depth ── */
+.insight-cell {
+  transition:
+    opacity    0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform  0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease;
+}
+
+/* ── Tension items: slide from left ── */
+.tension {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition:
+    opacity  0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tension.in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Process steps: stagger slide up ── */
+.process-step {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity  0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.process-step.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Opener title animation ── */
+.opener-title-anim {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity  0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+}
+.opener-title-anim.ot-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Audience cards: slide from right ── */
+.audience-card {
+  opacity: 0;
+  transform: translateX(16px);
+  transition:
+    opacity  0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.audience-card.in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Stat numbers: pop in with scale ── */
+.stat {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  transition:
+    opacity  0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.stat.in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ── Section crossfade: subtle bg shift on entry ── */
+.chapter {
+  transition: background-color 0.5s ease;
+}
+
+/* ── Hero section: grain + vignette breathe ── */
+@keyframes grain-drift {
+  0%, 100% { transform: translate(0, 0); }
+  25%       { transform: translate(-1px, 1px); }
+  50%       { transform: translate(1px, -1px); }
+  75%       { transform: translate(-1px, -1px); }
+}
+.hero::before {
+  animation: grain-drift 8s steps(2) infinite;
+}
+
+/* ── Scroll progress bar ── */
+#c-bar {
+  transition: opacity 0.3s ease;
+}
+
+/* ── Reduced motion: disable all animation additions ── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .tension,
+  .process-step,
+  .opener-title-anim,
+  .audience-card,
+  .stat {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .pull-statement .ps-word {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .canvas img {
+    transform: none !important;
+    transition: none !important;
+  }
+  .hero::before { animation: none; }
+}
+
+/* Images non-interactive — no pointer, no click */
+.canvas img { cursor: default; pointer-events: none; }
+
+/* ============================================================
+   MOBILE POLISH — v20
+   ============================================================ */
+
+/* Prevent any horizontal overflow site-wide */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Native momentum scrolling on iOS */
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* No blue tap flash on Android/iOS */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 767px) {
+
+  /* All scroll-driven transforms off on phones */
+  .canvas img,
+  [data-parallax] {
+    transform: none !important;
+  }
+
+  /* Reveals: faster + smaller offset so content appears promptly */
+  .reveal {
+    transform: translateY(18px);
+    transition-duration: 0.55s;
+  }
+  .tension { transform: translateX(-10px); }
+  .audience-card { transform: translateX(8px); }
+
+  /* Word-stagger pull statements: quicker on mobile */
+  .pull-statement .ps-word {
+    transition-duration: 0.35s;
+    transform: translateY(10px);
+  }
+
+  /* Tap targets: comfortable minimum */
+  .nav-links a,
+  .scroll-cue,
+  .index-item {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Big display headings scale down cleanly */
+  .opener-title,
+  .hero-title {
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  /* Tables/grids that could overflow: scroll instead of break */
+  .insight-matrix,
+  .tension-grid,
+  .stat-row {
+    max-width: 100%;
+  }
+
+  /* Persona/stat cards full-width stacking */
+  .persona-spread,
+  .two-col,
+  .three-col {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Comfortable paragraph width + size on small screens */
+  .editorial-body p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  /* Images never exceed viewport */
+  .canvas,
+  .canvas img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Section padding tightened */
+  .chapter {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  /* Footer / contact spacing */
+  footer, .footer {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .chapter-head h3 { font-size: 1.5rem; }
+  .pull-statement { font-size: 1.05rem; line-height: 1.6; }
+}

@@ -1,463 +1,276 @@
-/* =========================================================
-   ANANYA SINGH — ANIMATIONS, CURSOR, SCROLL, INTERACTIONS
-   ========================================================= */
+/* ============================================================
+   ANANYA SINGH — animations.js  v17
+   Smooth scroll + CoreHome-inspired entrance animations.
+   No structural changes — pure progressive enhancement.
+   ============================================================ */
 (function () {
   'use strict';
 
-  const IS_TOUCH   = 'ontouchstart' in window || window.matchMedia('(pointer:coarse)').matches;
-  const PRM        = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  const RAF        = requestAnimationFrame.bind(window);
-  const $ = s => document.querySelector(s);
-  const $$ = s => document.querySelectorAll(s);
+  const TOUCH = window.matchMedia('(pointer:coarse)').matches;
+  const PRM   = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
 
-  /* ════════════════════════════════════════════════════════
-     1. INERTIA SCROLL — proper physics-based smooth scroll
-     ════════════════════════════════════════════════════════ */
-  if (!IS_TOUCH && !PRM) {
-    let ease   = 0.072;   // lerp factor — tweak: lower = more liquid
-    let target = window.scrollY;
-    let current= window.scrollY;
-    let lastY  = window.scrollY;
-    let rafID  = null;
-    let fromWheel = false;
+  /* Custom cursor removed entirely — native OS cursor used */
 
-    function lerp(a, b, t) { return a + (b - a) * t; }
+  /* ══════════════════════════════════════════════════════════
+     2. SCROLL PROGRESS BAR
+  ══════════════════════════════════════════════════════════ */
+  if (!TOUCH && !PRM) {
+    const bar = document.createElement('div');
+    bar.id = 'c-bar';
+    document.body.appendChild(bar);
 
-    function scrollLoop() {
-      current = lerp(current, target, ease);
-      const diff = Math.abs(target - current);
-
-      if (diff > 0.08) {
-        window.scrollTo(0, current);
-        rafID = RAF(scrollLoop);
-      } else {
-        window.scrollTo(0, target);
-        current = target;
-        fromWheel = false;
-        rafID = null;
-      }
-    }
-
-    // Only intercept wheel; let keyboard/touch/anchor do native scroll
-    window.addEventListener('wheel', e => {
-      if (e.ctrlKey || e.metaKey) return; // pinch zoom
-      if (e.target.closest('.code-block,.cwc-circuits,.keyshot-showcase,.lb-content')) return;
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) * 1.2) return; // horizontal
-
-      e.preventDefault();
-
-      // Normalise delta across deltaMode
-      let delta = e.deltaY;
-      if (e.deltaMode === 1) delta *= 28;      // line mode
-      if (e.deltaMode === 2) delta *= window.innerHeight; // page mode
-
-      // Trackpad: smaller steps naturally; mouse wheel: amplify a little
-      const isMouse = !e.deltaMode && Math.abs(delta) >= 100;
-      if (isMouse) delta *= 0.9;
-
-      fromWheel = true;
-      target = Math.max(0, Math.min(
-        target + delta,
-        document.documentElement.scrollHeight - window.innerHeight
-      ));
-
-      if (!rafID) {
-        current = window.scrollY;
-        rafID = RAF(scrollLoop);
-      }
-    }, { passive: false });
-
-    // Keep target in sync when programmatic / anchor / keyboard scroll
     window.addEventListener('scroll', () => {
-      if (!fromWheel) {
-        target  = window.scrollY;
-        current = window.scrollY;
-      }
-      lastY = window.scrollY;
+      const pct = window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      bar.style.transform = `scaleX(${Math.min(pct, 1).toFixed(4)})`;
     }, { passive: true });
   }
 
-  /* ════════════════════════════════════════════════════════
-     2. CURSOR SYSTEM — ring + trailing dot + magnetic pull
-     ════════════════════════════════════════════════════════ */
-  if (IS_TOUCH) return; // nothing below runs on touch
-
-  // Build cursor DOM
-  const ring = document.createElement('div');
-  ring.className = 'cr-ring';
-
-  const dot = document.createElement('div');
-  dot.className = 'cr-dot';
-
-  // Trail dots
-  const TRAIL_COUNT = 8;
-  const trail = Array.from({ length: TRAIL_COUNT }, (_, i) => {
-    const t = document.createElement('div');
-    t.className = 'cr-trail';
-    t.style.setProperty('--i', i);
-    document.body.appendChild(t);
-    return t;
-  });
-
-  // Ripple pool
-  const RIPPLE_POOL = 4;
-  const ripples = Array.from({ length: RIPPLE_POOL }, () => {
-    const r = document.createElement('div');
-    r.className = 'cr-ripple';
-    document.body.appendChild(r);
-    return r;
-  });
-  let rippleIdx = 0;
-
-  document.body.appendChild(ring);
-  document.body.appendChild(dot);
-
-  let mx = -200, my = -200;   // mouse raw
-  let rx = -200, ry = -200;   // ring position (lerped)
-  let trailPos = Array(TRAIL_COUNT).fill({ x: -200, y: -200 });
-  let isHover  = false;
-  let isClick  = false;
-  let cursorLabel = '';
-
-  // State machine
-  const STATES = {
-    default: { ringScale: 1,    ringOpacity: 1,   dotScale: 1 },
-    hover:   { ringScale: 2.2,  ringOpacity: 0.7, dotScale: 0.4 },
-    image:   { ringScale: 3,    ringOpacity: 0.5, dotScale: 0.3 },
-    link:    { ringScale: 1.5,  ringOpacity: 0.85,dotScale: 0.7 },
-    click:   { ringScale: 0.7,  ringOpacity: 1,   dotScale: 1.8 },
-    text:    { ringScale: 0.15, ringOpacity: 0,   dotScale: 1   },
-  };
-  let currentState = 'default';
-  let rScale = 1, rOp = 1, dScale = 1;
-
-  function applyState(name) {
-    const s = STATES[name] || STATES.default;
-    rScale = s.ringScale; rOp = s.ringOpacity; dScale = s.dotScale;
-    currentState = name;
-    ring.style.transform = `translate(-50%,-50%) scale(${rScale})`;
-    ring.style.opacity   = rOp;
-    dot.style.transform  = `translate(-50%,-50%) scale(${dScale})`;
-
-    if (name === 'image') {
-      ring.classList.add('cr-ring--zoom');
-      ring.dataset.label = 'View';
-    } else {
-      ring.classList.remove('cr-ring--zoom');
-      ring.dataset.label = '';
-    }
+  /* ══════════════════════════════════════════════════════════
+     3. INTERSECTION OBSERVER — base reveal + stagger
+        Existing .reveal / .reveal-mask handled by main.js.
+        Here we enhance specific elements further.
+  ══════════════════════════════════════════════════════════ */
+  if (PRM) {
+    /* Reduced motion: just make everything visible */
+    document.querySelectorAll('.reveal, .reveal-mask').forEach(el => el.classList.add('in'));
+    return;
   }
 
-  // Detect what's under cursor
-  const IMG_TARGETS  = '.canvas, .opener-image, .about-portrait, .index-item .thumb';
-  const LINK_TARGETS = 'a, button, .index-item, .scroll-cue, .bt-item, .audience-card, .edu-card, .principle, .attr-chip, .insight-node';
-  const TEXT_TARGETS = 'p, h1, h2, h3, h4, h5, li, blockquote, .editorial-body, .about-intro';
-
-  function detectState(e) {
-    if (isClick) { applyState('click'); return; }
-    const el = e.target;
-    if (el.closest(IMG_TARGETS))  { applyState('image'); return; }
-    if (el.closest(LINK_TARGETS)) { applyState('link');  return; }
-    if (el.closest(TEXT_TARGETS)) { applyState('text');  return; }
-    applyState('default');
-  }
-
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    // Dot snaps
-    dot.style.left = mx + 'px';
-    dot.style.top  = my + 'px';
-    detectState(e);
-  });
-
-  document.addEventListener('mousedown', () => { isClick = true;  applyState('click'); fireRipple(); });
-  document.addEventListener('mouseup',   () => { isClick = false; applyState(currentState); });
-  document.addEventListener('mouseleave',() => { ring.style.opacity = '0'; dot.style.opacity = '0'; });
-  document.addEventListener('mouseenter',() => { ring.style.opacity = ''; dot.style.opacity  = ''; });
-
-  // Ring lerp loop
-  let ringRaf;
-  function ringLoop() {
-    rx += (mx - rx) * 0.12;
-    ry += (my - ry) * 0.12;
-    ring.style.left = rx + 'px';
-    ring.style.top  = ry + 'px';
-
-    // Trail: each follows the one before with increasing delay
-    let px = mx, py = my;
-    trail.forEach((t, i) => {
-      const lf = 0.38 - i * 0.035;
-      const prev = trailPos[i];
-      const nx = prev.x + (px - prev.x) * lf;
-      const ny = prev.y + (py - prev.y) * lf;
-      trailPos[i] = { x: nx, y: ny };
-      const scale = 1 - i / TRAIL_COUNT;
-      const op = (1 - i / TRAIL_COUNT) * 0.5;
-      t.style.transform = `translate(-50%,-50%) scale(${scale})`;
-      t.style.opacity   = op;
-      t.style.left = nx + 'px';
-      t.style.top  = ny + 'px';
-      px = nx; py = ny;
+  /* ── 4a. Standard reveals (main.js also does this — belt+braces) */
+  const rio = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target); }
     });
+  }, { threshold: TOUCH ? 0.02 : 0.08, rootMargin: TOUCH ? '0px 0px 8% 0px' : '0px 0px -4% 0px' });
+  document.querySelectorAll('.reveal, .reveal-mask').forEach(el => rio.observe(el));
 
-    ringRaf = RAF(ringLoop);
-  }
-  ringLoop();
+  /* ── 4b. Stagger children of grid containers */
+  const STAGGER_SELECTORS = [
+    '.insight-matrix',
+    '.tension-grid',
+    '.process-timeline',
+    '.edu-grid',
+    '.skills-list',
+    '.stat-row',
+    '.principle-grid',
+    '.brand-pillars',
+    '.audience-col-list',
+    '.bidet-types-row',
+    '.persona-spread',
+    '.tp-cues',
+    '.three-col',
+    '.two-col',
+  ];
 
-  // Click ripple
-  function fireRipple() {
-    const r = ripples[rippleIdx % RIPPLE_POOL];
-    rippleIdx++;
-    r.style.left    = mx + 'px';
-    r.style.top     = my + 'px';
-    r.style.opacity = '1';
-    r.style.transform = 'translate(-50%,-50%) scale(0)';
-    // Force reflow
-    void r.offsetWidth;
-    r.style.transition = 'transform 0.65s cubic-bezier(0.16,1,0.3,1), opacity 0.65s ease';
-    r.style.transform = 'translate(-50%,-50%) scale(1)';
-    r.style.opacity   = '0';
-  }
-
-  /* ════════════════════════════════════════════════════════
-     3. FLOATING DOT FIELD — animated background particles
-     ════════════════════════════════════════════════════════ */
-  const canvas = document.createElement('canvas');
-  canvas.className = 'dot-field';
-  document.body.prepend(canvas);
-  const ctx = canvas.getContext('2d');
-
-  let W, H;
-  const DOT_COUNT = 55;
-  const dots = [];
-
-  class Dot {
-    constructor() { this.reset(true); }
-    reset(init) {
-      this.x  = Math.random() * W;
-      this.y  = init ? Math.random() * H : H + 10;
-      this.r  = Math.random() * 1.6 + 0.3;
-      this.vx = (Math.random() - 0.5) * 0.18;
-      this.vy = -(Math.random() * 0.25 + 0.06);
-      this.op = Math.random() * 0.35 + 0.05;
-      this.pulse = Math.random() * Math.PI * 2;
-    }
-    update(t) {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.pulse += 0.018;
-      // Drift toward cursor very softly
-      const dx = mx - this.x, dy = my - this.y;
-      const dist = Math.hypot(dx, dy);
-      if (dist < 200) {
-        this.x += (dx / dist) * 0.12;
-        this.y += (dy / dist) * 0.12;
+  document.querySelectorAll(STAGGER_SELECTORS.join(',')).forEach(parent => {
+    const children = Array.from(parent.children);
+    children.forEach((child, i) => {
+      if (!child.classList.contains('reveal')) {
+        child.classList.add('reveal');
       }
-      if (this.y < -10 || this.x < -10 || this.x > W + 10) this.reset(false);
+      /* Override any existing delay with stagger */
+      child.style.transitionDelay = `${i * 70}ms`;
+    });
+  });
+
+  /* ── 4c. Chapter headings: label line draws in, then h3 rises */
+  document.querySelectorAll('.chapter-head').forEach(head => {
+    head.classList.add('ch-anim');
+    if (!head.classList.contains('reveal')) {
+      head.classList.add('reveal');
     }
-    draw() {
-      const op = this.op * (0.7 + 0.3 * Math.sin(this.pulse));
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(201,168,118,${op})`;
-      ctx.fill();
-    }
-  }
+  });
 
-  function resizeDots() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
+  /* ── 4d. Insight cells: individual stagger regardless of parent */
+  document.querySelectorAll('.insight-cell').forEach((cell, i) => {
+    if (!cell.classList.contains('reveal')) cell.classList.add('reveal');
+    /* Stagger within each matrix independently */
+    const siblings = Array.from(cell.parentNode.children);
+    const idx = siblings.indexOf(cell);
+    cell.style.transitionDelay = `${idx * 55}ms`;
+  });
 
-  function initDots() {
-    resizeDots();
-    for (let i = 0; i < DOT_COUNT; i++) dots.push(new Dot());
-  }
+  /* ── 4e. Persona cards: lift + fade */
+  document.querySelectorAll('.persona-card').forEach((card) => {
+    if (!card.classList.contains('reveal-mask')) card.classList.add('reveal-mask');
+  });
 
-  let dotRaf;
-  function dotLoop(t) {
-    ctx.clearRect(0, 0, W, H);
-    // Connection lines near cursor
-    for (let i = 0; i < dots.length; i++) {
-      const d = dots[i];
-      d.update(t);
-      // Connect nearby dots
-      for (let j = i + 1; j < dots.length; j++) {
-        const d2 = dots[j];
-        const dist = Math.hypot(d.x - d2.x, d.y - d2.y);
-        if (dist < 90) {
-          ctx.beginPath();
-          ctx.moveTo(d.x, d.y);
-          ctx.lineTo(d2.x, d2.y);
-          ctx.strokeStyle = `rgba(201,168,118,${0.07 * (1 - dist / 90)})`;
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
+  /* Re-observe anything newly marked */
+  document.querySelectorAll('.reveal:not(.in), .reveal-mask:not(.in)').forEach(el => rio.observe(el));
+
+  /* ══════════════════════════════════════════════════════════
+     4. PARALLAX — images deepen on scroll (CoreHome's main move)
+        Images inside .canvas scale very slightly as they
+        enter and exit viewport — creates the "alive" feeling.
+  ══════════════════════════════════════════════════════════ */
+  const parallaxEls = TOUCH ? [] : document.querySelectorAll('[data-parallax]');
+  const canvasImgs  = TOUCH ? [] : document.querySelectorAll('.canvas img');
+
+  /* Track all elements needing scroll-driven transforms */
+  const scrollDriven = [];
+
+  parallaxEls.forEach(el => {
+    scrollDriven.push({ el, type: 'parallax', speed: parseFloat(el.dataset.parallax) || 0.12 });
+  });
+
+  canvasImgs.forEach(img => {
+    scrollDriven.push({ el: img, type: 'scale' });
+  });
+
+  let scrollRAF = false;
+  const onScroll = () => {
+    if (scrollRAF) return;
+    scrollRAF = true;
+    requestAnimationFrame(() => {
+      scrollRAF = false;
+      const vy = window.innerHeight;
+      scrollDriven.forEach(({ el, type, speed }) => {
+        const rect = el.getBoundingClientRect();
+        /* Only process when near viewport */
+        if (rect.bottom < -vy || rect.top > vy * 2) return;
+
+        if (type === 'parallax') {
+          const offset = (vy / 2 - (rect.top + rect.height / 2)) * speed;
+          el.style.transform = `translate3d(0,${offset.toFixed(1)}px,0)`;
+        } else if (type === 'scale') {
+          /* Subtle scale: 1.00 when centred in viewport, 1.06 at edges */
+          const center = rect.top + rect.height / 2;
+          const dist   = Math.abs(vy / 2 - center) / vy;
+          const scale  = 1.06 - dist * 0.06;
+          el.style.transform = `scale3d(${scale.toFixed(4)},${scale.toFixed(4)},1)`;
         }
+      });
+    });
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ══════════════════════════════════════════════════════════
+     5. SECTION ENTRANCE — chapter background crossfade
+        Dark ↔ light sections: fade the bg slightly as they
+        enter, giving a breathing quality to long scrolls.
+  ══════════════════════════════════════════════════════════ */
+  const chapterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('chapter-visible');
+      } else {
+        e.target.classList.remove('chapter-visible');
       }
-      d.draw();
-    }
-    dotRaf = RAF(dotLoop);
-  }
-
-  window.addEventListener('resize', resizeDots, { passive: true });
-  initDots();
-  dotLoop(0);
-
-  /* ════════════════════════════════════════════════════════
-     4. CURSOR MAGNETIC PULL on buttons & links
-     ════════════════════════════════════════════════════════ */
-  const magnetTargets = $$('.scroll-cue, .nav-mark, .lb-close');
-  magnetTargets.forEach(el => {
-    el.addEventListener('mousemove', e => {
-      const rect = el.getBoundingClientRect();
-      const cx   = rect.left + rect.width  / 2;
-      const cy   = rect.top  + rect.height / 2;
-      const dx   = e.clientX - cx;
-      const dy   = e.clientY - cy;
-      el.style.transform = `translate(${dx * 0.28}px, ${dy * 0.28}px)`;
     });
-    el.addEventListener('mouseleave', () => {
-      el.style.transform = '';
-      el.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1)';
-      setTimeout(() => { el.style.transition = ''; }, 550);
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.chapter').forEach(ch => chapterObserver.observe(ch));
+
+  /* ══════════════════════════════════════════════════════════
+     6. STATS COUNT-UP
+  ══════════════════════════════════════════════════════════ */
+  const sio = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const el  = e.target;
+      const raw = el.textContent.trim();
+      const num = parseFloat(raw.replace(/[^\d.]/g, ''));
+      const suf = raw.replace(/[\d.]/g, '');
+      if (isNaN(num)) return;
+      const dur = 1400, t0 = performance.now();
+      const countTick = (now) => {
+        const p = Math.min((now - t0) / dur, 1);
+        const v = 1 - Math.pow(1 - p, 3); /* ease-out-cubic */
+        el.textContent = (num < 10 ? (v * num).toFixed(1) : Math.round(v * num)) + suf;
+        if (p < 1) requestAnimationFrame(countTick);
+      };
+      requestAnimationFrame(countTick);
+      sio.unobserve(el);
     });
-  });
+  }, { threshold: TOUCH ? 0.3 : 0.8 });
+  document.querySelectorAll('.stat .n').forEach(el => sio.observe(el));
 
-  /* ════════════════════════════════════════════════════════
-     5. SCROLL PROGRESS BAR
-     ════════════════════════════════════════════════════════ */
-  const bar = document.createElement('div');
-  bar.className = 'scroll-progress';
-  document.body.appendChild(bar);
-  window.addEventListener('scroll', () => {
-    const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-    bar.style.transform = `scaleX(${Math.min(pct, 1)})`;
-  }, { passive: true });
+  /* Lightbox removed — images are non-interactive */
 
-  /* ════════════════════════════════════════════════════════
-     6. SECTION ACTIVE NAV
-     ════════════════════════════════════════════════════════ */
-  const navAs = $$('.nav-links a');
-  const sectionObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      const id = entry.target.id;
-      navAs.forEach(a => a.classList.toggle('nav-active', a.getAttribute('href') === `#${id}`));
+  /* ══════════════════════════════════════════════════════════
+     8. NAV ACTIVE SECTION HIGHLIGHT
+  ══════════════════════════════════════════════════════════ */
+  const navAs = document.querySelectorAll('.nav-links a');
+  const nio   = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      navAs.forEach(a =>
+        a.classList.toggle('active', a.getAttribute('href') === `#${e.target.id}`)
+      );
     });
   }, { threshold: 0.25 });
-  $$('.project, #about, #index').forEach(s => sectionObserver.observe(s));
+  document.querySelectorAll('.project, #about, #index').forEach(s => nio.observe(s));
 
-  /* ════════════════════════════════════════════════════════
-     7. STATS COUNT-UP
-     ════════════════════════════════════════════════════════ */
-  if (!PRM) {
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        const el  = entry.target;
-        const raw = el.textContent.trim();
-        const num = parseFloat(raw.replace(/[^\d.]/g, ''));
-        const suf = raw.replace(/[\d.]/g, '');
-        if (isNaN(num)) return;
-        const dur = 1400, start = performance.now();
-        const tick = now => {
-          const p = Math.min((now - start) / dur, 1);
-          const e = 1 - Math.pow(1 - p, 4);
-          el.textContent = (num < 10 ? (e * num).toFixed(1) : Math.round(e * num)) + suf;
-          if (p < 1) RAF(tick);
-        };
-        RAF(tick);
-        io.unobserve(el);
+  /* ══════════════════════════════════════════════════════════
+     9. PULL STATEMENT — word-by-word stagger
+         The big italic research questions reveal word by word.
+  ══════════════════════════════════════════════════════════ */
+  document.querySelectorAll('.pull-statement').forEach(el => {
+    /* Split into word spans */
+    const html = el.innerHTML;
+    /* Preserve existing HTML tags — only split text nodes */
+    const frag = document.createDocumentFragment();
+    const tmp  = document.createElement('div');
+    tmp.innerHTML = html;
+
+    let wordIdx = 0;
+    function processNode(node, target) {
+      if (node.nodeType === 3) { /* text node */
+        const words = node.textContent.split(/(\s+)/);
+        words.forEach(w => {
+          if (/^\s+$/.test(w)) {
+            target.appendChild(document.createTextNode(w));
+          } else if (w) {
+            const span = document.createElement('span');
+            span.className = 'ps-word';
+            span.textContent = w;
+            span.style.transitionDelay = `${wordIdx * 40}ms`;
+            wordIdx++;
+            target.appendChild(span);
+          }
+        });
+      } else if (node.nodeType === 1) {
+        const clone = node.cloneNode(false);
+        Array.from(node.childNodes).forEach(child => processNode(child, clone));
+        target.appendChild(clone);
+      }
+    }
+
+    Array.from(tmp.childNodes).forEach(child => processNode(child, frag));
+    el.innerHTML = '';
+    el.appendChild(frag);
+    el.classList.add('ps-ready');
+
+    /* Observe for reveal */
+    const psObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { el.classList.add('ps-in'); psObs.unobserve(el); }
       });
-    }, { threshold: 0.8 });
-    $$('.stat .n').forEach(el => io.observe(el));
-  }
+    }, { threshold: TOUCH ? 0.1 : 0.3 });
+    psObs.observe(el);
+  });
 
-  /* ════════════════════════════════════════════════════════
-     8. REVEAL STAGGER for sibling groups
-     ════════════════════════════════════════════════════════ */
-  if (!PRM) {
-    const groups = '.edu-grid,.skills-list,.journey,.bidet-types-row,.tp-cues,.cwc-circuits,.audience-col-list,.principle-grid,.index-list,.stat-row';
-    $$(groups).forEach(parent => {
-      Array.from(parent.children).forEach((child, i) => {
-        if (!child.classList.contains('reveal')) {
-          child.classList.add('reveal');
-          child.style.transitionDelay = `${i * 0.06}s`;
-        }
+  /* ══════════════════════════════════════════════════════════
+     10. OPENER TITLE — line-by-line slide up
+         Project opener h2 titles slide each line up on entry.
+  ══════════════════════════════════════════════════════════ */
+  document.querySelectorAll('.opener-title').forEach(el => {
+    el.classList.add('opener-title-anim');
+    const ot = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { el.classList.add('ot-in'); ot.unobserve(el); }
       });
-    });
-    // Re-observe any new reveals
-    const io2 = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io2.unobserve(e.target); } });
-    }, { threshold: 0.08, rootMargin: '0px 0px -4% 0px' });
-    $$('.reveal:not(.in)').forEach(el => io2.observe(el));
-  }
-
-  /* ════════════════════════════════════════════════════════
-     9. CANVAS IMAGE HOVER — opener tilt
-     ════════════════════════════════════════════════════════ */
-  $$('.opener-image').forEach(panel => {
-    if (PRM) return;
-    const img = panel.querySelector('img');
-    if (!img) return;
-    panel.addEventListener('mousemove', e => {
-      const r = panel.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width  - 0.5;
-      const y = (e.clientY - r.top)  / r.height - 0.5;
-      img.style.transform = `scale(1.05) translate(${x * -14}px,${y * -9}px)`;
-    });
-    panel.addEventListener('mouseleave', () => {
-      img.style.transition = 'transform 0.9s cubic-bezier(0.16,1,0.3,1)';
-      img.style.transform = '';
-      setTimeout(() => { img.style.transition = ''; }, 950);
-    });
+    }, { threshold: TOUCH ? 0.15 : 0.4 });
+    ot.observe(el);
   });
 
-  /* ════════════════════════════════════════════════════════
-     10. LIGHTBOX
-     ════════════════════════════════════════════════════════ */
-  let lb = null;
-  function buildLB() {
-    lb = document.createElement('div');
-    lb.className = 'lightbox';
-    lb.innerHTML = `
-      <div class="lb-backdrop"></div>
-      <button class="lb-close">✕</button>
-      <div class="lb-content"><img class="lb-img" alt=""/><div class="lb-caption"></div></div>`;
-    document.body.appendChild(lb);
-    lb.querySelector('.lb-backdrop').addEventListener('click', closeLB);
-    lb.querySelector('.lb-close').addEventListener('click', closeLB);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
-  }
-  function openLB(img) {
-    if (!lb) buildLB();
-    lb.querySelector('.lb-img').src = img.src;
-    lb.querySelector('.lb-img').alt = img.alt;
-    const fig = img.closest('.canvas')?.nextElementSibling;
-    lb.querySelector('.lb-caption').textContent =
-      (fig && fig.classList.contains('figure-caption')) ? fig.textContent.trim() : img.alt;
-    lb.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeLB() {
-    if (!lb) return;
-    lb.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  $$('.canvas img').forEach(img => {
-    img.style.cursor = 'zoom-in';
-    img.addEventListener('click', () => openLB(img));
-  });
-
-  /* ════════════════════════════════════════════════════════
-     11. INDEX ITEM CLICK → project section
-     ════════════════════════════════════════════════════════ */
-  $$('.index-item[data-href]').forEach(item => {
-    item.style.cursor = 'pointer';
-    item.addEventListener('click', () => {
-      const target = document.querySelector(item.dataset.href);
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
-    });
-  });
+  /* ══════════════════════════════════════════════════════════
+     11. HORIZONTAL LINE DRAW — chapter labels
+         The small gold line before chapter labels animates
+         from 0 to full width on section entry.
+  ══════════════════════════════════════════════════════════ */
+  /* Handled entirely in CSS via .chapter-visible + ::before transitions */
 
 })();
