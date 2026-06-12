@@ -111,13 +111,21 @@
     entries.forEach(e => {
       if (e.isIntersecting) {
         e.target.classList.add('chapter-visible');
-      } else {
-        e.target.classList.remove('chapter-visible');
+        chapterObserver.unobserve(e.target);
       }
     });
-  }, { threshold: 0.15 });
+  }, { threshold: 0.12 });
 
-  document.querySelectorAll('.chapter').forEach(ch => chapterObserver.observe(ch));
+  document.querySelectorAll('.chapter, .project-opener').forEach(ch => chapterObserver.observe(ch));
+
+  /* Index items: cascade in with stagger */
+  document.querySelectorAll('.index-item').forEach((item, i) => {
+    item.style.transitionDelay = `${i * 90}ms`;
+    rio.observe(item);
+  });
+
+  /* Figure captions outside chapters: observe individually */
+  document.querySelectorAll('.figure-caption').forEach(fc => rio.observe(fc));
 
   /* ══════════════════════════════════════════════════════════
      6. STATS COUNT-UP
