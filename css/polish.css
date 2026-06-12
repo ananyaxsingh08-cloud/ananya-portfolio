@@ -17,10 +17,10 @@ html {
 }
 
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
   /* Prevent overscroll rubber-band colour flash on iOS */
-  overscroll-behavior: none;
-  background-attachment: fixed;
+  overscroll-behavior-y: auto;
+  overscroll-behavior-x: none;
 }
 
 /* GPU-accelerate scrollable containers */
@@ -404,7 +404,7 @@ footer {
   }
 
   /* Prevent horizontal overflow */
-  body { overflow-x: hidden; }
+  body { overflow-x: clip; }
   .container, .container-wide { overflow-x: clip; }
 
   /* Chapter padding */
@@ -964,10 +964,20 @@ img[src*="moodboard"] {
    MOBILE POLISH — v20
    ============================================================ */
 
-/* Prevent any horizontal overflow site-wide */
+/* Prevent any horizontal overflow site-wide
+   (clip — unlike hidden — never creates a scroll container,
+   so the native vertical scrollbar works perfectly) */
 html, body {
-  overflow-x: hidden;
-  width: 100%;
+  overflow-x: clip;
+}
+
+/* Guarantee vertical scrolling by every input: wheel, scrollbar
+   drag, touch, keyboard, middle-click autoscroll */
+html {
+  overflow-y: scroll;
+}
+body {
+  touch-action: pan-y pinch-zoom;
 }
 
 /* Native momentum scrolling on iOS */
