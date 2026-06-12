@@ -34,10 +34,8 @@
   display: block;
   width: 100%; height: 100%;
   object-fit: cover;
-  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
 }
-.canvas:hover img { transform: scale(1.04); }
+/* Hover zoom removed — was forcing transform transitions on ~90 images */
 
 /* Index items */
 .index-item { position: relative; transition: background 0.25s ease; }
@@ -130,8 +128,7 @@
     display: flex; flex-direction: column;
     position: fixed; inset: 0; z-index: 99;
     justify-content: center; align-items: center; gap: 2.5rem;
-    background: rgba(8,8,8,0.98);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    background: rgba(8,8,8,0.99);
   }
   .nav-links.open a { font-size: 1.1rem; color: rgba(245,240,232,0.9); letter-spacing: 0.1em; }
   .nav-toggle { display: flex !important; }

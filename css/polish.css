@@ -109,9 +109,7 @@ body {
 /* ── 5. NAVIGATION ─────────────────────────────────────────── */
 .nav { background: transparent; }
 .nav.scrolled {
-  background: rgba(8,8,8,0.88);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(8,8,8,0.96);
   border-bottom: 1px solid var(--border-faint);
 }
 .nav-mark { color: var(--white-90); }
@@ -515,7 +513,6 @@ footer {
     align-items: center;
     gap: 2.5rem;
     z-index: 99;
-    backdrop-filter: blur(12px);
   }
   .nav-links.open a { font-size: 1.1rem; color: var(--white-90); letter-spacing: 0.1em; }
   .nav-toggle { display: flex; }
@@ -786,15 +783,11 @@ img[src*="moodboard"] {
    All original design preserved.
    ============================================================ */
 
-/* ── Canvas image scale breathe (parallax feel) ── */
+/* ── Canvas images: static, no scroll-driven transforms ── */
 .canvas img {
-  transition: transform 0.1s linear;
-  will-change: transform;
-  transform-origin: center center;
+  transform: none;
 }
-/* Override the hover scale from cursor.css to work with JS scale */
 .canvas:hover img {
-  /* JS handles the transform; hover tint via filter */
   filter: brightness(1.03);
 }
 
@@ -931,21 +924,9 @@ img[src*="moodboard"] {
   transform: translateY(0) scale(1);
 }
 
-/* ── Section crossfade: subtle bg shift on entry ── */
-.chapter {
-  transition: background-color 0.5s ease;
-}
+/* Chapter bg transition removed — unnecessary repaint risk */
 
-/* ── Hero section: grain + vignette breathe ── */
-@keyframes grain-drift {
-  0%, 100% { transform: translate(0, 0); }
-  25%       { transform: translate(-1px, 1px); }
-  50%       { transform: translate(1px, -1px); }
-  75%       { transform: translate(-1px, -1px); }
-}
-.hero::before {
-  animation: grain-drift 8s steps(2) infinite;
-}
+/* Grain animation removed — infinite animations cause constant repaints */
 
 /* ── Scroll progress bar ── */
 #c-bar {

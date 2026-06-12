@@ -98,53 +98,9 @@
   /* Re-observe anything newly marked */
   document.querySelectorAll('.reveal:not(.in), .reveal-mask:not(.in)').forEach(el => rio.observe(el));
 
-  /* ══════════════════════════════════════════════════════════
-     4. PARALLAX — images deepen on scroll (CoreHome's main move)
-        Images inside .canvas scale very slightly as they
-        enter and exit viewport — creates the "alive" feeling.
-  ══════════════════════════════════════════════════════════ */
-  const parallaxEls = TOUCH ? [] : document.querySelectorAll('[data-parallax]');
-  const canvasImgs  = TOUCH ? [] : document.querySelectorAll('.canvas img');
-
-  /* Track all elements needing scroll-driven transforms */
-  const scrollDriven = [];
-
-  parallaxEls.forEach(el => {
-    scrollDriven.push({ el, type: 'parallax', speed: parseFloat(el.dataset.parallax) || 0.12 });
-  });
-
-  canvasImgs.forEach(img => {
-    scrollDriven.push({ el: img, type: 'scale' });
-  });
-
-  let scrollRAF = false;
-  const onScroll = () => {
-    if (scrollRAF) return;
-    scrollRAF = true;
-    requestAnimationFrame(() => {
-      scrollRAF = false;
-      const vy = window.innerHeight;
-      scrollDriven.forEach(({ el, type, speed }) => {
-        const rect = el.getBoundingClientRect();
-        /* Only process when near viewport */
-        if (rect.bottom < -vy || rect.top > vy * 2) return;
-
-        if (type === 'parallax') {
-          const offset = (vy / 2 - (rect.top + rect.height / 2)) * speed;
-          el.style.transform = `translate3d(0,${offset.toFixed(1)}px,0)`;
-        } else if (type === 'scale') {
-          /* Subtle scale: 1.00 when centred in viewport, 1.06 at edges */
-          const center = rect.top + rect.height / 2;
-          const dist   = Math.abs(vy / 2 - center) / vy;
-          const scale  = 1.06 - dist * 0.06;
-          el.style.transform = `scale3d(${scale.toFixed(4)},${scale.toFixed(4)},1)`;
-        }
-      });
-    });
-  };
-
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  /* Scroll-driven parallax/scale removed — was measuring ~90 images
+     per scroll frame and causing lag. Reveals (one-time, observer-based)
+     provide all the motion the site needs. */
 
   /* ══════════════════════════════════════════════════════════
      5. SECTION ENTRANCE — chapter background crossfade
