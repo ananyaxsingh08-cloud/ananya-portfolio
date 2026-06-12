@@ -44,18 +44,7 @@
   }, { threshold: 0.1, rootMargin: '0px 0px -5% 0px' });
   document.querySelectorAll('.reveal, .reveal-mask').forEach(el => io.observe(el));
 
-  /* ── PARALLAX (subtle) ─────────────────────────────────── */
-  const pEls = document.querySelectorAll('[data-parallax]');
-  if (pEls.length) {
-    window.addEventListener('scroll', () => {
-      pEls.forEach(el => {
-        const speed = parseFloat(el.dataset.parallax) || 0.12;
-        const rect  = el.getBoundingClientRect();
-        const offset = (window.innerHeight / 2 - (rect.top + rect.height / 2)) * speed;
-        el.style.transform = `translate3d(0,${offset.toFixed(1)}px,0)`;
-      });
-    }, { passive: true });
-  }
+  /* Parallax removed for scroll performance */
 
   /* ── LAZY IMAGES ───────────────────────────────────────── */
   document.querySelectorAll('img').forEach(img => {
